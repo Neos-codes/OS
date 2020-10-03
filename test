@@ -18,3 +18,8 @@ mas lineas(int gae) {
   }
 aaasdasdasdakfhe
 }
+
+void loop(){
+    loop:
+    goto loop;
+}
