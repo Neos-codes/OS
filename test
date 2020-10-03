@@ -27,5 +27,11 @@ int main() {
 }
 // borra3
 
+void foo(){
+
+  printf("Wena los k\n");
+
+}
+
 wena BRUH 2.0
 wena amigo 2.0
