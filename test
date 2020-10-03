@@ -24,3 +24,8 @@ int main() {
     char super-f;
 
 }
+
+void loop(){
+    loop:
+    goto loop;
+}
