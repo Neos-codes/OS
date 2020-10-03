@@ -24,3 +24,8 @@ int main() {
     char super-f;
     cambios de pablo
 }
+
+void loop(){
+    loop:
+    goto loop;
+}
