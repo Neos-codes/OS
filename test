@@ -19,6 +19,10 @@ mas lineas(int gae) {
 aaasdasdasdakfhe
 }
 
+void cambios-pablo() {
+    int wootwoot;
+}
+
 
 int main() {
     int x;
@@ -31,6 +35,10 @@ void foo(){
 
   printf("Wena los k\n");
 
+void loop(){
+    loop:
+    goto loop;
+    I'm BACK;
 }
 
 wena BRUH 2.0
