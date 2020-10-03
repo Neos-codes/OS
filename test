@@ -1,4 +1,5 @@
-Wena hermane, el Rodolfo se la come
+Wena hermane, el Rodolfo se la come con mayo
+agregan3 otra cosa
 #include <tuhermana.h>
 
 mas lineas(int gae) {
@@ -28,9 +29,17 @@ int main() {
     char super-f;
     cambios de pablo
 }
+// borra3
+
+void foo(){
+
+  printf("Wena los k\n");
 
 void loop(){
     loop:
     goto loop;
     I'm BACK;
 }
+
+wena BRUH 2.0
+wena amigo 2.0
