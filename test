@@ -1,4 +1,4 @@
-Wena hermane, el Rodolfo se la come
+Wena hermane, el Rodolfo se la come con mayo
 #include <tuhermana.h>
 
 mas lineas(int gae) {
@@ -24,8 +24,6 @@ int main() {
     char super-f;
     cambios de pablo
 }
+// borra3
 
-void loop(){
-    loop:
-    goto loop;
-}
+wena hermane 2.0
