@@ -5,7 +5,10 @@ AAASSSDDD
 
 
 
-mas lineas(int gae) {
-
+mas lineas(int gae, char F) {
+  if (dead) {
+    F = tru;
+    return 420;
+  }
 aaasdasdasdakfhe
 }
