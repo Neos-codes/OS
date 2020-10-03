@@ -1,6 +1,5 @@
 Wena hermane, el Rodolfo se la come
-
-AAASSSDDD
+#include <tuhermana.h>
 
 mas lineas(int gae) {
     I am TNT
@@ -17,4 +16,11 @@ mas lineas(int gae) {
     return 420;
   }
 aaasdasdasdakfhe
+}
+
+
+int main() {
+    int x;
+    char super-f;
+
 }
