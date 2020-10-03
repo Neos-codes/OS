@@ -2,7 +2,6 @@ Wena hermane, el Rodolfo se la come
 
 AAASSSDDD
 
-
 mas lineas(int gae) {
     I am TNT
     I'm dinamite
@@ -12,5 +11,10 @@ mas lineas(int gae) {
     I'm a poewrload!
     TNT
     Watch me exploooooooode!
+
+  if (dead) {
+    F = tru;
+    return 420;
+  }
 aaasdasdasdakfhe
 }
