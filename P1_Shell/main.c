@@ -5,7 +5,7 @@
 #include <sys/wait.h>
 
 void stringParsing(char **cmd, char *line, int *wordsInCmd);
-void promptLine();
+void promptLine(char *line);
 
 
 int main(){
@@ -25,8 +25,8 @@ int main(){
   }
   else if(pid == 0){       // Hijo
     printf("Hijo creado\n");
-    char *cmds[3] = {"ls", "-n", NULL};
-    execvp(cmds[0], cmds);
+    //char *cmds[3] = {"ls", "-n", NULL};
+    execvp(cmd[0], cmd);
     printf("Error al ejecutar comando!\n");
     //exit(0);
   }
@@ -41,27 +41,33 @@ int main(){
 
 void stringParsing(char **cmd, char *line, int *wordsInCmd){
 
-  int nwords = 2, count = 0;
+  int nwords = 0, count = 0;
   char *temp;
   // nwords por defecto en 2, la primera palabra y el NULL del final
   
+  bool inSpace = true;
   while(line[count] != '\0'){      // Contamos palabras
     if(line[count] == ' '){
-     nwords++;
+      inSpace = true;
     } 
+    else if (inSpace){
+      inSpace = false;
+      nwords++;
+    }
     count++;
-  }//EndWhile
+  }
+  //EndWhile
   
   *wordsInCmd = nwords;
 
-  printf("Palabras: %d\n", nwords - 1);
+  printf("Palabras: %d\n", nwords);
 
   // Pedimos espacio para punteros de las palabras con malloc
   cmd = (char **)malloc(nwords*sizeof(char *));
 
   count = 0;
   while((temp = strsep(&line, " ")) != NULL){
-    // printf("Temp: %s\n", temp);
+    printf("Temp: %s\n", temp);
     cmd[count] = strdup(temp);
     count++;
   }
