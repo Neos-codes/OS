@@ -4,7 +4,9 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-void stringParsing(char **cmd, char *line, int *wordsInCmd);
+
+int stringParsing(char **cmd, char *line);
+
 void promptLine(char *line);
 
 
@@ -13,11 +15,16 @@ int main(){
   char line[100], **cmd;
   int wordsInCmd;
   promptLine(line);
-  stringParsing(cmd, line, &wordsInCmd);
+  wordsInCmd = stringParsing(cmd, line);
+  
+  printf("N palabras desde main: %d\n", wordsInCmd);
 
+  printf("Desde main:\n");
+  for(int i = 0; i < wordsInCmd; i++){
+    printf("%s\n", cmd[i]);
+  }
 
   pid_t pid = fork();
-
   
   if(pid < 0){
     printf("Error al crear hijo!\n");
@@ -39,53 +46,61 @@ int main(){
 }
 
 
-void stringParsing(char **cmd, char *line, int *wordsInCmd){
+int stringParsing(char **cmd, char *line){
 
   int nwords = 0, count = 0;
   char *temp;
   // nwords por defecto en 2, la primera palabra y el NULL del final
-  
-  bool inSpace = true;
+
+
+  int inSpace = 1;
   while(line[count] != '\0'){      // Contamos palabras
     if(line[count] == ' '){
-      inSpace = true;
+      inSpace = 1;
     } 
-    else if (inSpace){
-      inSpace = false;
+    else if(inSpace){
       nwords++;
+      inSpace = 0;
     }
     count++;
-  }
-  //EndWhile
-  
-  *wordsInCmd = nwords;
+  }//EndWhile
 
-  printf("Palabras: %d\n", nwords);
+  //printf("Palabras: %d\n", nwords);
 
   // Pedimos espacio para punteros de las palabras con malloc
-  cmd = (char **)malloc(nwords*sizeof(char *));
+  cmd = (char **)malloc((nwords+1)*sizeof(char *));
 
   count = 0;
+  printf("problem?\n");
   while((temp = strsep(&line, " ")) != NULL){
-    printf("Temp: %s\n", temp);
-    cmd[count] = strdup(temp);
+
+
+    cmd[count] = (char *)malloc(strlen(temp)*sizeof(char));
+    strcpy(cmd[count], temp);
+    printf("%s\n", cmd[count]);
+
     count++;
   }
+  printf("Fin\n");
+  for(int i = 0; i < nwords; i++){
+    printf("%s\n", cmd[i]);
+  }
   
-  cmd[nwords - 1] = NULL;    // Dejamos el extra como NULL
+  cmd[nwords] = NULL;    // Dejamos el extra como NULL
 
 
   
   //Imprimir palabras separadas
-  printf("Palabras pareseadas\n");
+  /*printf("Palabras pareseadas\n");
   for(int i = 0; i < nwords; i++){
     if(cmd[i] != NULL)
       printf("%s\n", cmd[i]);
     else if(cmd[i] == NULL){
       printf("Nulo en pos %d\n", i);
     }
-  }
-  
+    }*/
+
+  return nwords;
 }
 
 void promptLine(char *line){
