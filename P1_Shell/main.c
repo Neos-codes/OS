@@ -42,9 +42,9 @@ int main(){
   if(fp == NULL)
     cout << "Problema al abrir mishell.log" << endl;
 
-  system("clear");
+  //system("clear");
 
-  bool running = promptLine(line);
+  bool running = running = promptLine(line);;
   while (running){
     
     wordsInCmd = stringParsing(cmd, line);
