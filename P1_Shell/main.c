@@ -19,6 +19,12 @@ EXIT NOT WORKING PROPERLY
 
 */
 
+/*ADDEd
+working CD
+
+
+*/
+
 
 int stringParsing(char **cmd, char *line);
 
@@ -34,7 +40,7 @@ void executeProgram(char *cmd[100]){
   }
   else if(pid == 0){       // Hijo
     //printf("Hijo creado\n");
-    cout<<"Hijo creado\n";
+    //cout<<"Hijo creado\n";
     //char *cmds[3] = {"ls", "-n", NULL};
     execvp(cmd[0], cmd);
     //printf("Error al ejecutar comando!\n");
@@ -53,6 +59,7 @@ int main(){
   char line[100];
   char *cmd[100];
   int wordsInCmd;
+  system("clear");
 
   bool running = promptLine(line);
   while (running){
@@ -165,7 +172,7 @@ bool promptLine(char *line){
     getcwd(curDir, sizeof(curDir));
     getlogin_r(curUsr, sizeof(curUsr));
     gethostname(curHst, sizeof(curHst));
-    cout<<curUsr<<"@"<<curHst<<":~"<<get_current_dir_name()<<" "<<getpid()<<" $> ";
+    cout<<"\033[1;31m"<<curUsr<<"@"<<curHst<<"\033[0m:\033[1;36m~"<<get_current_dir_name()<<" "<<getpid()<<"\033[0m > ";
     fgets(line, 100, stdin);
   }while(line[0] == '\n');
 
