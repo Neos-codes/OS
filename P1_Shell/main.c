@@ -8,23 +8,6 @@
 
 using namespace std;
 
-
-/*BUGS VERSION 0.01 RODOLFO
-
-
-
-*/
-
-/*FIXED
-EXIT NOT WORKING PROPERLY
-
-*/
-
-/*ADDEd
-working CD
-
-
-*/
 void sig_handler(int sig) {
     if(sig == SIGCHLD){
       printf("llega senal de fin hijo\n");
@@ -35,41 +18,7 @@ int stringParsing(char **cmd, char *line);
 
 bool promptLine(char *line);
 
-void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activeProc){
-  cout<<"Ejecuto fork()\n";
-  pid_t pid = fork();
-  
-
-  if(pid < 0){
-    //printf("Error al crear hijo!\n");
-    cout<<"Error al crear hijo!\n";
-    exit(0);
-  }
-  else if(pid == 0){       // Hijo
-    printf("Soy hijo H: %d mi padre P : %d\n", getpid(), getppid());
-    //printf("Hijo creado\n");
-    //cout<<"Hijo creado\n";
-    //char *cmds[3] = {"ls", "-n", NULL};
-    execvp(cmd[0], cmd);
-    //printf("Error al ejecutar comando!\n");
-    cout<<"No se reconoce el comando ";
-    for (int i = 0; i < words; ++i)
-    {
-      cout<<cmd[i]<<" ";
-    }
-    cout<<endl;
-    exit(0);
-  }
-  else{                   // Padre
-    printf("Soy padre P: %d mi Hijo : %d\n", getpid(), pid);
-    if (!runBg){
-      wait(NULL);
-    }
-    activeProc.push_back(pid);
-    //
-    //exit(0);
-  }
-}
+void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activeProc);
 
 
 int main(){
@@ -84,6 +33,13 @@ int main(){
   bool runBg;
   int wordsInCmd;
 
+  FILE *fp = fopen("mishell.log", "a+");
+  if(fp == NULL){
+    cout << "Fallo apertura o creacion de mishell.log" << endl;
+    return 0;
+  }
+  fseek(fp, 0, SEEK_END);
+
   system("clear");
   //Notar que hacer system clear crea un proceso que ejecuta el clear
   //esto activa el signal con sigchild
@@ -91,6 +47,11 @@ int main(){
   bool running = promptLine(line);
   while (running){
     wordsInCmd = stringParsing(cmd, line);
+    for(int i = 0; i < wordsInCmd; i++){
+      fprintf(fp, "%s ", cmd[i]);
+    }
+    fprintf(fp, "\n");
+    fseek(fp, 0, SEEK_END);
     
     //printf("N palabras desde main: %d\n", wordsInCmd);
     //cout<<"N palabras desde main: "<<wordsInCmd<<endl;
@@ -243,4 +204,40 @@ bool promptLine(char *line){
   }*/
   return true;
   //printf("Prompt leyo: %s\n", line);
+}
+
+void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activeProc){
+  cout<<"Ejecuto fork()\n";
+  pid_t pid = fork();
+  
+
+  if(pid < 0){
+    //printf("Error al crear hijo!\n");
+    cout<<"Error al crear hijo!\n";
+    exit(0);
+  }
+  else if(pid == 0){       // Hijo
+    printf("Soy hijo H: %d mi padre P : %d\n", getpid(), getppid());
+    //printf("Hijo creado\n");
+    //cout<<"Hijo creado\n";
+    //char *cmds[3] = {"ls", "-n", NULL};
+    execvp(cmd[0], cmd);
+    //printf("Error al ejecutar comando!\n");
+    cout<<"No se reconoce el comando ";
+    for (int i = 0; i < words; ++i)
+    {
+      cout<<cmd[i]<<" ";
+    }
+    cout<<endl;
+    exit(0);
+  }
+  else{                   // Padre
+    printf("Soy padre P: %d mi Hijo : %d\n", getpid(), pid);
+    if (!runBg){
+      wait(NULL);
+    }
+    activeProc.push_back(pid);
+    //
+    //exit(0);
+  }
 }
