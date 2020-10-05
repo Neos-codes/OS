@@ -30,28 +30,7 @@ int stringParsing(char **cmd, char *line);
 
 bool promptLine(char *line);
 
-void executeProgram(char *cmd[100]){
-  pid_t pid = fork();
-    
-  if(pid < 0){
-    //printf("Error al crear hijo!\n");
-    cout<<"Error al crear hijo!\n";
-    exit(0);
-  }
-  else if(pid == 0){       // Hijo
-    //printf("Hijo creado\n");
-    //cout<<"Hijo creado\n";
-    //char *cmds[3] = {"ls", "-n", NULL};
-    execvp(cmd[0], cmd);
-    //printf("Error al ejecutar comando!\n");
-    cout<<"Error al ejecutar comando!\n";
-    exit(0);
-  }
-  else{                   // Padre
-    wait(NULL);
-    //exit(0);
-  }
-}
+void executeProgram(char *cmd[100], int words, FILE *fp);
 
 
 int main(){
@@ -59,6 +38,12 @@ int main(){
   char line[100];
   char *cmd[100];
   int wordsInCmd;
+  
+  FILE *fp = fopen("mishell.log", "a+");      // Abrir mishell.log
+  fseek(fp, 0, SEEK_END);
+  if(fp == NULL)
+    cout << "Problema al abrir mishell.log" << endl;
+
   system("clear");
 
   bool running = promptLine(line);
@@ -76,6 +61,7 @@ int main(){
 
     //Check if function is built in
     if (!strcmp(cmd[0], "exit")){
+      fprintf(fp, "%s\n", cmd[0]);
       cout<<"Exiting, cya l8r aligator\n";
       return 0;
     }
@@ -87,7 +73,7 @@ int main(){
 
 
     //Run program
-    executeProgram(cmd);
+    executeProgram(cmd, wordsInCmd, fp);
     end:
     running = promptLine(line);
   }
@@ -166,32 +152,49 @@ bool promptLine(char *line){
   char curUsr[64];
   char curHst[64];
   do{                                            
-  // Vuelve a preguntar mientras
-    //printf(">>> ");                         
-    // Se aprete Enter
-    getcwd(curDir, sizeof(curDir));
+  // Vuelve a preguntar mientras se aprete Enter
+    getcwd(curDir, sizeof(curDir));      // Imprimir prompt
     getlogin_r(curUsr, sizeof(curUsr));
     gethostname(curHst, sizeof(curHst));
+    
     cout<<"\033[1;31m"<<curUsr<<"@"<<curHst<<"\033[0m:\033[1;36m~"<<get_current_dir_name()<<" "<<getpid()<<"\033[0m > ";
-    fgets(line, 100, stdin);
+    fgets(line, 100, stdin);                   // Leer linea
   }while(line[0] == '\n');
-
-
-  //NEEDLESS SPACES START
-
   line[strlen(line) - 1] = '\0';
-
-
-
-  //NEEDLESS SPACES END
-
-
+  
   /*
   for(int i = 0; i < strlen(line); i++){
     if(line[i] == '\n')
-      //printf("En pos i: %d", i);
       cout<<"En pos i: "<<i<<endl;
   }*/
   return true;
   //printf("Prompt leyo: %s\n", line);
+}
+
+void executeProgram(char *cmd[100], int words, FILE *fp){
+  pid_t pid = fork();
+    
+  if(pid < 0){
+    cout<<"Error al crear hijo!\n";
+    exit(0);
+  }
+  else if(pid == 0){       // Hijo
+    //cout<<"Hijo creado\n";
+    //char *cmds[3] = {"ls", "-n", NULL};
+
+    for(int i = 0; i < words; i++)     // Escribir linea en mishell.log
+      fprintf(fp, "%s ", cmd[i]);
+    fprintf(fp, "\n");
+    
+    execvp(cmd[0], cmd);
+    cout<<"Error al ejecutar ";
+    for(int i = 0; i < words; i++)
+      cout << cmd[i] << " ";
+    cout << endl;
+    exit(0);
+  }
+  else{                   // Padre
+    wait(NULL);
+    //exit(0);
+  }
 }
