@@ -48,7 +48,9 @@ int main(){
 
   bool running = promptLine(line);
   while (running){
+    
     wordsInCmd = stringParsing(cmd, line);
+
     for(int i = 0; i < wordsInCmd; i++){     // Escribir linea en mishell.log
       fprintf(fp, "%s ", cmd[i]);
     }
