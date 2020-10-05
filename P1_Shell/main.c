@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -24,31 +25,48 @@ working CD
 
 
 */
-
+void sig_handler(int sig) {
+    if(sig == SIGCHLD){
+      printf("llega senal de fin hijo\n");
+    }
+}
 
 int stringParsing(char **cmd, char *line);
 
 bool promptLine(char *line);
 
-void executeProgram(char *cmd[100]){
+void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activeProc){
+  cout<<"Ejecuto fork()\n";
   pid_t pid = fork();
-    
+  
+
   if(pid < 0){
     //printf("Error al crear hijo!\n");
     cout<<"Error al crear hijo!\n";
     exit(0);
   }
   else if(pid == 0){       // Hijo
+    printf("Soy hijo H: %d mi padre P : %d\n", getpid(), getppid());
     //printf("Hijo creado\n");
     //cout<<"Hijo creado\n";
     //char *cmds[3] = {"ls", "-n", NULL};
     execvp(cmd[0], cmd);
     //printf("Error al ejecutar comando!\n");
-    cout<<"Error al ejecutar comando!\n";
+    cout<<"No se reconoce el comando ";
+    for (int i = 0; i < words; ++i)
+    {
+      cout<<cmd[i]<<" ";
+    }
+    cout<<endl;
     exit(0);
   }
   else{                   // Padre
-    wait(NULL);
+    printf("Soy padre P: %d mi Hijo : %d\n", getpid(), pid);
+    if (!runBg){
+      wait(NULL);
+    }
+    activeProc.push_back(pid);
+    //
     //exit(0);
   }
 }
@@ -56,10 +74,19 @@ void executeProgram(char *cmd[100]){
 
 int main(){
 
+
+  signal(SIGCHLD, sig_handler);
+  //sig child se produce cuado un hijo termina
+
   char line[100];
   char *cmd[100];
+  vector<int> activeProc;
+  bool runBg;
   int wordsInCmd;
+
   system("clear");
+  //Notar que hacer system clear crea un proceso que ejecuta el clear
+  //esto activa el signal con sigchild
 
   bool running = promptLine(line);
   while (running){
@@ -76,7 +103,7 @@ int main(){
 
     //Check if function is built in
     if (!strcmp(cmd[0], "exit")){
-      cout<<"Exiting, cya l8r aligator\n";
+      cout<<"Exiting\n";
       return 0;
     }
 
@@ -84,12 +111,34 @@ int main(){
       chdir(cmd[1]);
       goto end;
     }
+    if (!strcmp(cmd[0], "help")){
+      cout<<"Welcome to CFF shell, it includes support for the following built-in commands"<<endl;
+      cout<<"-cd [directory]\n-help\n-exit\n";
+      cout<<"-------------------\n";
+      goto end;
+    }
+
+    if (!strcmp(cmd[wordsInCmd-1], "&")){
+      cout<<"Hay que correr en BG\n";
+      runBg = true;
+    }
+    else{
+      runBg = false;
+    }
+
 
 
     //Run program
-    executeProgram(cmd);
+    if(wordsInCmd > 0){
+      executeProgram(cmd, wordsInCmd, runBg, activeProc);
+    }
     end:
+    for (int i = 0; i < activeProc.size(); ++i)
+    {
+      cout<<"Process of ID"<<activeProc[i]<<endl;
+    }
     running = promptLine(line);
+
   }
   
   return 0;
@@ -172,10 +221,10 @@ bool promptLine(char *line){
     getcwd(curDir, sizeof(curDir));
     getlogin_r(curUsr, sizeof(curUsr));
     gethostname(curHst, sizeof(curHst));
-    cout<<"\033[1;31m"<<curUsr<<"@"<<curHst<<"\033[0m:\033[1;36m~"<<get_current_dir_name()<<" "<<getpid()<<"\033[0m > ";
+    cout<<"\033[1;31m"<<curUsr<<"@"<<curHst<<"\033[0m:\033[1;36m~"<<get_current_dir_name()<<" "<<"\033[0m > ";
     fgets(line, 100, stdin);
   }while(line[0] == '\n');
-
+  //<<getpid()
 
   //NEEDLESS SPACES START
 
