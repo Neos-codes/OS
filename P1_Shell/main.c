@@ -20,7 +20,6 @@ bool promptLine(char *line);
 
 void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activeProc);
 
-
 int main(){
 
 
@@ -39,7 +38,6 @@ int main(){
     return 0;
   }
   fseek(fp, 0, SEEK_END);
-
   system("clear");
   //Notar que hacer system clear crea un proceso que ejecuta el clear
   //esto activa el signal con sigchild
