@@ -32,9 +32,7 @@ bool promptLine(char *line);
 
 void executeProgram(char *cmd[100], int words, FILE *fp);
 
-
 int main(){
-
   char line[100];
   char *cmd[100];
   int wordsInCmd;
@@ -76,6 +74,7 @@ int main(){
 
 
     //Run program
+    
     executeProgram(cmd, wordsInCmd, fp);
     end:
     running = promptLine(line);
@@ -163,6 +162,10 @@ bool promptLine(char *line){
     cout<<"\033[1;31m"<<curUsr<<"@"<<curHst<<"\033[0m:\033[1;36m~"<<get_current_dir_name()<<" "<<getpid()<<"\033[0m > ";
     fgets(line, 100, stdin);                   // Leer linea
   }while(line[0] == '\n');
+
+
+  //NEEDLESS SPACES START
+
   line[strlen(line) - 1] = '\0';
   
   /*
