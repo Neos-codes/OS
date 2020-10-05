@@ -49,6 +49,10 @@ int main(){
   bool running = promptLine(line);
   while (running){
     wordsInCmd = stringParsing(cmd, line);
+    for(int i = 0; i < wordsInCmd; i++){     // Escribir linea en mishell.log
+      fprintf(fp, "%s ", cmd[i]);
+    }
+    fprintf(fp, "\n");
     
     //printf("N palabras desde main: %d\n", wordsInCmd);
     //cout<<"N palabras desde main: "<<wordsInCmd<<endl;
@@ -61,7 +65,6 @@ int main(){
 
     //Check if function is built in
     if (!strcmp(cmd[0], "exit")){
-      fprintf(fp, "%s\n", cmd[0]);
       cout<<"Exiting, cya l8r aligator\n";
       return 0;
     }
@@ -135,7 +138,7 @@ int stringParsing(char **cmd, char *line){
 
   
   //Imprimir palabras separadas
-  /*printf("Palabras pareseadas\n");
+  /* printf("Palabras pareseadas\n");
   for(int i = 0; i < nwords; i++){
     if(cmd[i] != NULL)
       printf("%s\n", cmd[i]);
@@ -172,6 +175,7 @@ bool promptLine(char *line){
 }
 
 void executeProgram(char *cmd[100], int words, FILE *fp){
+
   pid_t pid = fork();
     
   if(pid < 0){
@@ -181,11 +185,6 @@ void executeProgram(char *cmd[100], int words, FILE *fp){
   else if(pid == 0){       // Hijo
     //cout<<"Hijo creado\n";
     //char *cmds[3] = {"ls", "-n", NULL};
-
-    for(int i = 0; i < words; i++)     // Escribir linea en mishell.log
-      fprintf(fp, "%s ", cmd[i]);
-    fprintf(fp, "\n");
-    
     execvp(cmd[0], cmd);
     cout<<"Error al ejecutar ";
     for(int i = 0; i < words; i++)
