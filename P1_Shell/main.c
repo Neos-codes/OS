@@ -257,7 +257,7 @@ bool promptLine(char *line){
 }
 
 int update_freq (char **cmd, int wordsInCmd, vector <pair<int, char *> > &command_freq) {
-    if (strcmp(cmd[0], "mostrarFrec")) {
+    if (!strcmp(cmd[0], "mostrarFrec")) {
         command_freq[0].first++;
         return 0;
     }
@@ -270,15 +270,16 @@ int update_freq (char **cmd, int wordsInCmd, vector <pair<int, char *> > &comman
         strcat(str, " ");
         strcat(str, cmd[i]);
     }
-    cout << "el comando reconstruido y siendo agregado a command_freq es: "<< str << endl;
+    // cout << "el comando reconstruido y siendo agregado a command_freq es: "<< str << endl;
     for (int i = 0; i < command_freq.size(); i++) {
         if (strcmp(str, command_freq[i].second) == 0) {
             command_freq[i].first++;
 
-            cout << "lista de frecuencias de los comandos:" << endl; //debug
-            for (int i = 0; i < command_freq.size(); i++) {
-                cout << command_freq[i]. first << " " << command_freq[i].second << endl;
-            }
+            // cout << "lista de frecuencias de los comandos:" << endl; //debug
+            // for (int i = 0; i < command_freq.size(); i++) {
+            //     cout << command_freq[i]. first << " " << command_freq[i].second << endl;
+            // }
+
             return 0;
         }
     }
@@ -286,16 +287,16 @@ int update_freq (char **cmd, int wordsInCmd, vector <pair<int, char *> > &comman
     aux.first = 1;
     aux.second = strdup(str);
     command_freq.push_back(aux);
-    cout << "comando nuevo, agregado a la lista." << endl;
+    // cout << "comando nuevo, agregado a la lista." << endl;
 
-    cout << "lista de frecuencias de los comandos:" << endl; //debug
-    for (int i = 0; i < command_freq.size(); i++) {
-        cout << command_freq[i]. first << " " << command_freq[i].second << endl;
-    }
-
+    // cout << "lista de frecuencias de los comandos:" << endl; //debug
+    // for (int i = 0; i < command_freq.size(); i++) {
+    //     cout << command_freq[i]. first << " " << command_freq[i].second << endl;
+    // }
 
     return 0;
 }
+
 void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activeProcesses){
   //cout<<"Ejecuto fork()\n";
   pid_t pid = fork();
@@ -333,8 +334,5 @@ void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activePr
     	activeProcesses.push_back(pid);
     	cout<<"["<<pid<<"] in background"<<endl;
     }
-
-    //
-    //exit(0);
   }
 }
