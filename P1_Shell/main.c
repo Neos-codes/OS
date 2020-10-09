@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 
 using namespace std;
@@ -23,39 +24,20 @@ void executeProgram(char *cmd[100]){
   pid_t pid = fork();
 
   if(pid < 0){
-    //printf("Error al crear hijo!\n");
     cout<<"Error al crear hijo!\n";
     exit(0);
   }
   else if(pid == 0){       // Hijo
-    //printf("Hijo creado\n");
-    //cout<<"Hijo creado\n";
-    //char *cmds[3] = {"ls", "-n", NULL};
     execvp(cmd[0], cmd);
-    //printf("Error al ejecutar comando!\n");
     cout<<"Error al ejecutar comando!\n";
     exit(0);
   }
   else{                   // Padre
     wait(NULL);
-    //exit(0);
   }
 }
 
-int update_freq (char *line, vector <pair<int, char *> > &command_freq) {
-    for (int i = 0; i < command_freq.size(); i++) {
-        if (strcmp(line, command_freq[i].second) == 0) {
-            command_freq[i].first++;
-            return 0;
-        }
-    }
-    pair<int, char *> aux;
-    aux.first = 1;
-    aux.second = strdup(line);
-    command_freq.push_back(aux);
-    // printf("%s check!\n", command_freq.back().second);
-    return 0;
-}
+int update_freq (char **cmd, int wordsInCmd, vector <pair<int, char *> > &command_freq);
 
 
 int main(){
@@ -68,8 +50,9 @@ int main(){
     bool running = promptLine(line);
 
     while (running){
-        update_freq (line, command_freq);
         wordsInCmd = stringParsing(cmd, line);
+        top:
+        update_freq (cmd, wordsInCmd, command_freq);
 
     //printf("N palabras desde main: %d\n", wordsInCmd);
     //cout<<"N palabras desde main: "<<wordsInCmd<<endl;
@@ -90,17 +73,47 @@ int main(){
             chdir(cmd[1]);
             goto end;
         }
-        if (!strcmp(cmd[0], "revisarVector")){ //for debug
-            cout << "en el vector hay " << command_freq.size() <<" elementos:" << endl;
-            for (int i = 0; i < command_freq.size(); i++) {
-                printf("%d %s\n", command_freq[i].first, command_freq[i].second);
+        // if (!strcmp(cmd[0], "revisarVector")){ //for debug
+        //     cout << "en el vector hay " << command_freq.size() <<" elementos:" << endl;
+        //     for (int i = 0; i < command_freq.size(); i++) {
+        //         printf("%d %s\n", command_freq[i].first, command_freq[i].second);
+        //     }
+        //     goto end;
+        // }
+        if (!strcmp(cmd[0], "mostrarFrec")){
+            if (cmd[1] == NULL) {
+                cout << "Error. Expecting integer as argument for mostrarFrec" << endl;
+                goto end;
             }
-            goto end;
+
+            vector <pair<int, char *> > aux = command_freq;
+            sort(aux.begin(), aux.end());
+            reverse(aux.begin(), aux.end());
+            int k = atoi(cmd[1]);
+            cout << "Los " << k << " comandos más utlilzados son:" << endl;
+            for (int i = 0; i < k && i < command_freq.size(); i++) {
+                cout << "(" << i+1 << ")" << " " << aux[i].second << endl;
+                // printf("(%d) %s\n", count, aux[i].second);
+            }
+            cout << "Desea ejecutar alguno de estos? (1/2/.../k o 'n' para declinar)" << endl;
+            // char c[4];
+            string c;
+            cin >> c;
+            getchar();
+            if (!c.compare("n")) goto end;
+            int num;
+            num = atoi(c.c_str());
+            wordsInCmd = stringParsing(cmd, aux[num-1].second);
+            fflush(stdin);
+            goto top;
+
+            // goto end;
         }
 
 
         //Run program
         executeProgram(cmd);
+        // cout << "debug" << endl;
         end:
         running = promptLine(line);
     }
@@ -194,17 +207,27 @@ bool promptLine(char *line){
 
   line[strlen(line) - 1] = '\0';
 
-
-
-  //NEEDLESS SPACES END
-
-
-  /*
-  for(int i = 0; i < strlen(line); i++){
-    if(line[i] == '\n')
-      //printf("En pos i: %d", i);
-      cout<<"En pos i: "<<i<<endl;
-  }*/
   return true;
   //printf("Prompt leyo: %s\n", line);
+}
+
+int update_freq (char **cmd, int wordsInCmd, vector <pair<int, char *> > &command_freq) {
+    char str[100];
+    strcpy(str, cmd[0]);
+    for (int i = 1; i < wordsInCmd; i++) {
+        strcat(str, " ");
+        strcat(str, cmd[i]);
+    }
+    for (int i = 0; i < command_freq.size(); i++) {
+        if (strcmp(str, command_freq[i].second) == 0) {
+            command_freq[i].first++;
+            return 0;
+        }
+    }
+    pair<int, char *> aux;
+    aux.first = 1;
+    aux.second = strdup(str);
+    command_freq.push_back(aux);
+    // printf("%s check!\n", command_freq.back().second);
+    return 0;
 }
