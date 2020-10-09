@@ -23,6 +23,8 @@ int main(){
 
 
   vector <pair<int, char *> > command_freq;
+  command_freq.push_back(make_pair(0, strdup("mostrarFrec")));
+
   char line[100];
   char *cmd[100];
   vector<int> activeProcesses;
@@ -30,9 +32,6 @@ int main(){
   int pidDummy;
   int waitDummy;
   int status;
-  //signal(SIGCHLD, sig_handler);
-
-
   bool runBg;
   int wordsInCmd;
 
@@ -49,16 +48,18 @@ int main(){
 
 
   while (running){
-    
+
   	promptLine(line);
     wordsInCmd = stringParsing(cmd, line);
+
+    top:
     update_freq (cmd, wordsInCmd, command_freq);
     for(int i = 0; i < wordsInCmd; i++){
       fprintf(fp, "%s ", cmd[i]);
     }
     fprintf(fp, "\n");
     fseek(fp, 0, SEEK_END);
-    
+
     //Check background processes
     if (activeProcesses.size() > 0){
   		//cout<<"Lista procesos\n";
@@ -80,7 +81,7 @@ int main(){
     //Check if function is built in
 
     if (!strcmp(cmd[0], "exit")){
-      if(activeProcesses.size() > 0){        
+      if(activeProcesses.size() > 0){
         cout<<"Aun hay procesos en ejecucion, esta seguro que desea salir? (Y) (N)\n";
       	for (int i = 0; i < activeProcesses.size(); ++i)
       	{
@@ -90,7 +91,7 @@ int main(){
         getchar();
         if(c == 121 || c == 89){
         	//Si escribe Y o y se sale
-        	
+
           //se sale del programa
           running = false;
           continue;
@@ -108,17 +109,18 @@ int main(){
       chdir(cmd[1]);
       continue;
     }
-    
+
     if (!strcmp(cmd[0], "mostrarFrec")){
-            if (cmd[1] == NULL) {
-                cout << "Error. Expecting integer as argument for mostrarFrec" << endl;
-                continue;
-            }
 
             vector <pair<int, char *> > aux = command_freq;
             sort(aux.begin(), aux.end());
             reverse(aux.begin(), aux.end());
-            int k = atoi(cmd[1]);
+            int k;
+            if (cmd[1] == NULL) {
+                k = 5;
+            } else {
+                k = atoi(cmd[1]);
+            }
             cout << "Los " << k << " comandos más utlilzados son:" << endl;
             for (int i = 0; i < k && i < command_freq.size(); i++) {
                 cout << "(" << i+1 << ")" << " " << aux[i].second << endl;
@@ -127,19 +129,30 @@ int main(){
             cout << "Desea ejecutar alguno de estos? (1/2/.../k o 'n' para declinar)" << endl;
             // char c[4];
             string c;
+            readC:
             cin >> c;
             getchar();
             if (!c.compare("n")) continue;
+            for (int i = 0; i < c.size(); i++) {
+                if (c.c_str()[i] < '0' || c.c_str()[i] > '9') {
+                    cout << "Indice invalido" << endl;
+                    goto readC;
+                }
+            }
             int num;
             num = atoi(c.c_str());
+            if (num > k || num < 1) {
+                cout << "Indice invalido" << endl;
+                goto readC;
+            }
             wordsInCmd = stringParsing(cmd, aux[num-1].second);
-            fflush(stdin);
-            continue;
-        }
+            cout << "cant de argumentos del comando es: " << wordsInCmd << endl;
+            goto top;
     }
+
     if (!strcmp(cmd[0], "help")){
       cout<<"Welcome to CFF shell, it includes support for the following built-in commands"<<endl;
-      cout<<"-cd [directory]\n-help\n-exit\n";
+      cout<<"-cd [directory]\n-mostrarFrec\n-help\n-exit\n";
       cout<<"-------------------\n";
       continue;
     }
@@ -150,12 +163,6 @@ int main(){
     }
     else{
       runBg = false;
-    }
-    if (!strcmp(cmd[0], "help")){
-      cout<<"Welcome to CFF shell, it includes support for the following built-in commands"<<endl;
-      cout<<"-cd [directory]\n-help\n-exit\n";
-      cout<<"-------------------\n";
-      continue;
     }
 
     if (!strcmp(cmd[wordsInCmd-1], "&")){
@@ -171,7 +178,7 @@ int main(){
       executeProgram(cmd, wordsInCmd, runBg, activeProcesses);
     }
   }
-  
+
   return 0;
 }
 
@@ -195,21 +202,12 @@ int stringParsing(char **cmd, char *line){
     count++;
   }//EndWhile
 
-  //printf("Palabras: %d\n", nwords);
-
   // Pedimos espacio para punteros de las palabras con malloc
-  //cmd = (char **)malloc((nwords+1)*sizeof(char *));
 
   count = 0;
   //cout<<"problem?\n";
   while(1){
-
-
     cmd[count] = (temp = strsep(&line, " "));
-    //cout<<cmd[count]<<" WITH "<<count<<endl;
-
-    //printf("%s WITH %d\n", cmd[count], count);
-    //printf("%s\n", cmd[count]);
 
     if (cmd[count] == NULL){
       break;
@@ -219,10 +217,7 @@ int stringParsing(char **cmd, char *line){
     }
     count++;
   }
-  /*cout<<"Fin\n";
-  for(int i = 0; i < nwords; i++){
-    cout<<cmd[i]<<endl;
-  }*/
+
 
   cmd[nwords] = NULL;    // Dejamos el extra como NULL
 
@@ -246,8 +241,8 @@ bool promptLine(char *line){
   char curUsr[64];
   char curHst[64];
 
-  do{                                            
-  	// Vuelve a preguntar mientras 
+  do{
+  	// Vuelve a preguntar mientras
     // Se apreto Enter y se muestra el prompt
     getcwd(curDir, sizeof(curDir));
     getlogin_r(curUsr, sizeof(curUsr));
@@ -262,15 +257,28 @@ bool promptLine(char *line){
 }
 
 int update_freq (char **cmd, int wordsInCmd, vector <pair<int, char *> > &command_freq) {
+    if (strcmp(cmd[0], "mostrarFrec")) {
+        command_freq[0].first++;
+        return 0;
+    }
+
     char str[100];
     strcpy(str, cmd[0]);
+
+
     for (int i = 1; i < wordsInCmd; i++) {
         strcat(str, " ");
         strcat(str, cmd[i]);
     }
+    cout << "el comando reconstruido y siendo agregado a command_freq es: "<< str << endl;
     for (int i = 0; i < command_freq.size(); i++) {
         if (strcmp(str, command_freq[i].second) == 0) {
             command_freq[i].first++;
+
+            cout << "lista de frecuencias de los comandos:" << endl; //debug
+            for (int i = 0; i < command_freq.size(); i++) {
+                cout << command_freq[i]. first << " " << command_freq[i].second << endl;
+            }
             return 0;
         }
     }
@@ -278,7 +286,14 @@ int update_freq (char **cmd, int wordsInCmd, vector <pair<int, char *> > &comman
     aux.first = 1;
     aux.second = strdup(str);
     command_freq.push_back(aux);
-    // printf("%s check!\n", command_freq.back().second);
+    cout << "comando nuevo, agregado a la lista." << endl;
+
+    cout << "lista de frecuencias de los comandos:" << endl; //debug
+    for (int i = 0; i < command_freq.size(); i++) {
+        cout << command_freq[i]. first << " " << command_freq[i].second << endl;
+    }
+
+
     return 0;
 }
 void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activeProcesses){
@@ -307,7 +322,7 @@ void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activePr
     //Terminar el hijo
     exit(0);
   }
-  else{                   
+  else{
   	// Padre
     //printf("Soy padre P: %d mi Hijo : %d\n", getpid(), pid);
     if (!runBg){
@@ -318,7 +333,7 @@ void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activePr
     	activeProcesses.push_back(pid);
     	cout<<"["<<pid<<"] in background"<<endl;
     }
-    
+
     //
     //exit(0);
   }
