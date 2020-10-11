@@ -24,107 +24,105 @@ void the_purge(vector <pid_t> &zombie_list);
 
 
 int main(){
-  vector <pair<int, char *> > command_freq;
-  command_freq.push_back(make_pair(0, strdup("mostrarFrec")));
-  vector <pid_t> zombie_list;
+    vector <pair<int, char *> > command_freq;
+    command_freq.push_back(make_pair(0, strdup("mostrarFrec")));
+    vector <pid_t> zombie_list;
 
-  char line[100];
-  char *cmd[100];
-  vector<int> activeProcesses;
-  bool running = true;
-  int pidDummy;
-  int waitDummy;
-  int status;
-  bool runBg;
-  int wordsInCmd;
+    char line[100];
+    char *cmd[100];
+    vector<int> activeProcesses;
+    bool running = true;
+    int pidDummy;
+    int waitDummy;
+    int status;
+    bool runBg;
+    int wordsInCmd;
 
-  FILE *fp = fopen("mishell.log", "a+");
-  if(fp == NULL){
-    cout << "Fallo apertura o creacion de mishell.log" << endl;
-    return 0;
-  }
-  fseek(fp, 0, SEEK_END);
-
-  system("clear");
-  //Notar que hacer system clear crea un proceso que ejecuta el clear
-  //esto activa el signal con sigchild
-
-
-  while (running){
-
-  	promptLine(line);
-    wordsInCmd = stringParsing(cmd, line);
-
-    top:
-    update_freq (cmd, wordsInCmd, command_freq);
-    for(int i = 0; i < wordsInCmd; i++){
-      fprintf(fp, "%s ", cmd[i]);
+    FILE *fp = fopen("mishell.log", "a+");
+    if(fp == NULL){
+        cout << "Fallo apertura o creacion de mishell.log" << endl;
+        return 0;
     }
-    fprintf(fp, "\n");
     fseek(fp, 0, SEEK_END);
 
-    //Check background processes
-    if (activeProcesses.size() > 0){
-  		//cout<<"Lista procesos\n";
-    	for (int i = 0; i < activeProcesses.size(); ++i)
-    	{
-    		//cout<<"PID del proceso "<<activeProcesses[i]<<endl;
-	    	pidDummy = activeProcesses[i];
-	    	waitDummy = waitpid(pidDummy, &status, WNOHANG);
-	    	//cout<<waitDummy<<" WAITPID\n";
-	    	if (waitDummy == pidDummy){
-	    		//cout<<"Pid "<<pidDummy<<" ya termino, se remueve de la lista\n";
-	    		activeProcesses.erase(activeProcesses.begin()+i);
-	    		--i;
-	    	}
-    	}
-    }
+    system("clear");
+    //Notar que hacer system clear crea un proceso que ejecuta el clear
+    //esto activa el signal con sigchild
 
 
-    //Check if function is built in
+    while (running){
+    	promptLine(line);
+        wordsInCmd = stringParsing(cmd, line);
 
-    if (!strcmp(cmd[0], "exit")){
-      if(activeProcesses.size() > 0){
-        cout<<"Aun hay procesos en ejecucion, esta seguro que desea salir? (Y) (N)\n";
-      	for (int i = 0; i < activeProcesses.size(); ++i)
-      	{
-      	  cout<<"Proceso "<<activeProcesses[i]<<endl;
-      	}
-      	char c = getchar();
-        getchar();
-        if(c == 121 || c == 89){
-        	//Si escribe Y o y se sale
-
-          //se sale del programa
-          running = false;
-          continue;
+        top:
+        update_freq (cmd, wordsInCmd, command_freq);
+        for(int i = 0; i < wordsInCmd; i++){
+            fprintf(fp, "%s ", cmd[i]);
         }
-        else{
-        	continue;
+        fprintf(fp, "\n");
+        fseek(fp, 0, SEEK_END);
+
+        //Check background processes
+        if (activeProcesses.size() > 0){
+        		//cout<<"Lista procesos\n";
+        	for (int i = 0; i < activeProcesses.size(); ++i)
+        	{
+        		//cout<<"PID del proceso "<<activeProcesses[i]<<endl;
+            	pidDummy = activeProcesses[i];
+            	waitDummy = waitpid(pidDummy, &status, WNOHANG);
+            	//cout<<waitDummy<<" WAITPID\n";
+            	if (waitDummy == pidDummy){
+            		//cout<<"Pid "<<pidDummy<<" ya termino, se remueve de la lista\n";
+            		activeProcesses.erase(activeProcesses.begin()+i);
+            		--i;
+            	}
+        	}
         }
-      }
-      cout<<"Exiting\n";
-      running = false;
-      continue;
-    }
 
-    if (!strcmp(cmd[0], "cd")){
-      chdir(cmd[1]);
-      continue;
-    }
 
-    if (!strcmp(cmd[0], "arise")){
-      createZombies(cmd[1], zombie_list);
-      continue;
-    }
+        //Check if function is built in
 
-    if (!strcmp(cmd[0], "purge")){
-      the_purge(zombie_list);
-      continue;
-    }
+        if (!strcmp(cmd[0], "exit")){
+            if(activeProcesses.size() > 0){
+                cout<<"Aun hay procesos en ejecucion, esta seguro que desea salir? (Y) (N)\n";
+            	for (int i = 0; i < activeProcesses.size(); ++i)
+            	{
+                    cout<<"Proceso "<<activeProcesses[i]<<endl;
+            	}
+            	char c = getchar();
+                getchar();
+                if(c == 121 || c == 89){
+                    //Si escribe Y o y se sale
 
-    if (!strcmp(cmd[0], "mostrarFrec")){
+                    //se sale del programa
+                    running = false;
+                    continue;
+                }
+                else{
+                	continue;
+                }
+            }
+            cout<<"Exiting\n";
+            running = false;
+            continue;
+        }
 
+        if (!strcmp(cmd[0], "cd")){
+            chdir(cmd[1]);
+            continue;
+        }
+
+        if (!strcmp(cmd[0], "arise")){
+            createZombies(cmd[1], zombie_list);
+            continue;
+        }
+
+        if (!strcmp(cmd[0], "purge")){
+            the_purge(zombie_list);
+            continue;
+        }
+
+        if (!strcmp(cmd[0], "mostrarFrec")){
             vector <pair<int, char *> > aux = command_freq;
             sort(aux.begin(), aux.end());
             reverse(aux.begin(), aux.end());
@@ -161,37 +159,37 @@ int main(){
             wordsInCmd = stringParsing(cmd, aux[num-1].second);
             cout << "cant de argumentos del comando es: " << wordsInCmd << endl;
             goto top;
-    }
+        }
 
-    if (!strcmp(cmd[0], "help")){
-      cout<<"Welcome to CFF shell, it includes support for the following built-in commands"<<endl;
-      cout<<"-cd [directory]\n-mostrarFrec [n(default: 5)]\n-arise [n(default: 10)]\n-help\n-exit\n";
-      cout<<"-------------------\n";
-      continue;
-    }
+        if (!strcmp(cmd[0], "help")){
+            cout<<"Welcome to CFF shell, it includes support for the following built-in commands"<<endl;
+            cout<<"-cd [directory]\n-mostrarFrec [n(default: 5)]\n-arise [n(default: 10)]\n-help\n-exit\n";
+            cout<<"-------------------\n";
+            continue;
+        }
 
-    if (!strcmp(cmd[wordsInCmd-1], "&")){
-      //cout<<"Hay que correr en BG\n";
-      runBg = true;
-    }
-    else{
-      runBg = false;
-    }
+        if (!strcmp(cmd[wordsInCmd-1], "&")){
+            //cout<<"Hay que correr en BG\n";
+            runBg = true;
+        }
+        else{
+            runBg = false;
+        }
 
-    // if (!strcmp(cmd[wordsInCmd-1], "&")){
-    //   cout<<"Hay que correr en BG\n";
-    //   runBg = true;
-    // }
-    // else{
-    //   runBg = false;
-    // }
+        // if (!strcmp(cmd[wordsInCmd-1], "&")){
+        //   cout<<"Hay que correr en BG\n";
+        //   runBg = true;
+        // }
+        // else{
+        //   runBg = false;
+        // }
 
-    //Run program
-    if(wordsInCmd > 0){
-      executeProgram(cmd, wordsInCmd, runBg, activeProcesses);
+        //Run program
+        if(wordsInCmd > 0){
+            executeProgram(cmd, wordsInCmd, runBg, activeProcesses);
+        }
     }
-  }
-  return 0;
+    return 0;
 }
 
 
