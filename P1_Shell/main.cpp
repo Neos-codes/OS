@@ -33,34 +33,32 @@ int main(){
 	char *cmd[100];
 	vector<int> activeProcesses;
 	bool running = true;
+	bool log = false;
 	int pidDummy;
 	int waitDummy;
 	int status;
 	bool runBg;
 	int wordsInCmd;
 	int numPipes=0;
+	FILE *fp = fopen("mishell.log", "r");
+	if(fp == NULL)
+	  cout << "mishell.log no encontrado!\n";
 
 
 
-
-	FILE *fp = fopen("mishell.log", "a+");
-	if(fp == NULL){
-		cout << "Fallo apertura o creacion de mishell.log" << endl;
-		return 0;
-	}
-	fseek(fp, 0, SEEK_END);
+	
 
 	system("clear");
 	//Notar que hacer system clear crea un proceso que ejecuta el clear
 	//esto activa el signal con sigchild
 	cout<<"Welcome to CFF shell, it includes support for the following built-in commands"<<endl;
-	cout<<"-cd [directory]\n    ->Changes current directory\n-mostrarFrec [n(default: 5)]\n    ->Displays the n most used commands\n-arise [n(default: 10)]\n    ->Creates n defunct processes\n-purge\n    ->Reaps defunct processes created by the 'arise' command\n-help\n    ->Display help\n-exit\n    ->Exits the CFF shell\n";
+	cout<<"-cd [directory]\n    ->Changes current directory\n-mostrarFrec [n(default: 5)]\n    ->Displays the n most used commands\n-createlog\n   ->Appends or overwrites commands entered in \"mishell.log\"\n-arise [n(default: 10)]\n    ->Creates n defunct processes\n-purge\n    ->Reaps defunct processes created by the 'arise' command\n-help\n    ->Display help\n-exit\n    ->Exits the CFF shell\n";
 	cout<<"Additionally, the shell supports command piping using the | character. \nProcesses can be created in the background using the & character\n";
 	cout<<"Created by:\n       >Fabian Alexander Cid Escobar\n       >Rodolfo Jose Leopoldo Farina Reisenegger\n       >Pablo Javier Furet Pereira\n";
 	cout<<"-------------------\n";
 
 	while (running){
-
+	  
 		promptLine(line);
 		if (numPipes != 0)
 		{
@@ -76,12 +74,13 @@ int main(){
 
 		top:
 		update_freq (cmd, wordsInCmd, command_freq);
-		for(int i = 0; i < wordsInCmd; i++){
-			fprintf(fp, "%s ", cmd[i]);
+		if(log){
+		  for(int i = 0; i < wordsInCmd; i++){
+		    fprintf(fp, "%s ", cmd[i]);
+		  }
+		  fprintf(fp, "\n");
+		  fseek(fp, 0, SEEK_END);
 		}
-		fprintf(fp, "\n");
-		fseek(fp, 0, SEEK_END);
-
 		//Check background processes
 		if (activeProcesses.size() > 0){
 			//cout<<"Lista procesos\n";
@@ -126,11 +125,40 @@ int main(){
 			running = false;
 			continue;
 		}
-
-        if (!strcmp(cmd[0], "cd")){
-            chdir(cmd[1]);
-            continue;
-        }
+		
+		if(!strcmp(cmd[0], "createlog")){
+		    
+		    if(fp == NULL){
+		      fp = fopen("mishell.log", "a+");
+		      log = true;
+		      cout << "mishell.log creado" << endl;
+		    }
+		    else{
+		      int n,c;
+		      cout << "Ya existe el archivo mishell.log\nIngrese \"1 \" para sobreescribir o \"2\" para concatenar los comandos que se ingresaran\n";
+		      cin >> n;
+		      getchar();
+		      
+		      if(n == 1){
+			fp = fopen("mishell.log", "w");
+			log = true;
+			fseek(fp, 0, SEEK_END);
+		      }
+		      else if(n == 2){
+			fp = fopen("mishell.log", "a+");
+			log = true;
+			fseek(fp, 0, SEEK_END);
+		      }
+		      else
+			cout << "Numero no valido\n";
+		    }
+		    continue;
+		}
+		  
+		  if (!strcmp(cmd[0], "cd")){
+		    chdir(cmd[1]);
+		    continue;
+		  }
 
         if (!strcmp(cmd[0], "arise")){
             createZombies(cmd[1], zombie_list);
@@ -185,7 +213,7 @@ int main(){
 
 		if (!strcmp(cmd[0], "help")){
 			cout<<"Welcome to CFF shell, it includes support for the following built-in commands"<<endl;
-			cout<<"-cd [directory]\n    ->Changes current directory\n-mostrarFrec [n(default: 5)]\n    ->Displays the n most used commands\n-arise [n(default: 10)]\n    ->Creates n defunct processes\n-purge\n    ->Reaps defunct processes created by the 'arise' command\n-help\n    ->Display help\n-exit\n    ->Exits the CFF shell\n";
+			cout<<"-cd [directory]\n    ->Changes current directory\n-mostrarFrec [n(default: 5)]\n    ->Displays the n most used commands\n-createlog\n   ->Appends or overwrites commands entered in \"mishell.log\"\n-arise [n(default: 10)]\n    ->Creates n defunct processes\n-purge\n    ->Reaps defunct processes created by the 'arise' command\n-help\n    ->Display help\n-exit\n    ->Exits the CFF shell\n";
 			cout<<"Additionally, the shell supports command piping using the | character. \nProcesses can be created in the background using the & character\n";
 			cout<<"-------------------\n";
 			continue;
