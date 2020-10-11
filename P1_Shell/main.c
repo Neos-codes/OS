@@ -53,7 +53,11 @@ int main(){
 	system("clear");
 	//Notar que hacer system clear crea un proceso que ejecuta el clear
 	//esto activa el signal con sigchild
-
+	cout<<"Welcome to CFF shell, it includes support for the following built-in commands"<<endl;
+	cout<<"-cd [directory]\n    ->Changes current directory\n-mostrarFrec [n(default: 5)]\n    ->Displays the n most used commands\n-arise [n(default: 10)]\n    ->Creates n defunct processes\n-purge\n    ->Reaps defunct processes created by the 'arise' command\n-help\n    ->Display help\n-exit\n    ->Exits the CFF shell\n";
+	cout<<"Additionally, the shell supports command piping using the | character. \nProcesses can be created in the background using the & character\n";
+	cout<<"Created by:\n       >Fabian Alexander Cid Escobar\n       >Rodolfo Jose Leopoldo Farina Reisenegger\n       >Pablo Javier Furet Pereira\n";
+	cout<<"-------------------\n";
 
 	while (running){
 
@@ -65,10 +69,10 @@ int main(){
 		}
 		wordsInCmd = stringParsing(cmd, line, &numPipes);
 		//cout<<"numPipes = "<<numPipes<<endl;
-		for (int i = 0; i < wordsInCmd; ++i)
+		/*for (int i = 0; i < wordsInCmd; ++i)
 		{
 			cout<<cmd[i]<<endl;
-		}
+		}*/
 
 		top:
 		update_freq (cmd, wordsInCmd, command_freq);
@@ -181,7 +185,8 @@ int main(){
 
 		if (!strcmp(cmd[0], "help")){
 			cout<<"Welcome to CFF shell, it includes support for the following built-in commands"<<endl;
-			cout<<"-cd [directory]\n-mostrarFrec [n(default: 5)]\n-arise [n(default: 10)]\n-help\n-exit\n";
+			cout<<"-cd [directory]\n    ->Changes current directory\n-mostrarFrec [n(default: 5)]\n    ->Displays the n most used commands\n-arise [n(default: 10)]\n    ->Creates n defunct processes\n-purge\n    ->Reaps defunct processes created by the 'arise' command\n-help\n    ->Display help\n-exit\n    ->Exits the CFF shell\n";
+			cout<<"Additionally, the shell supports command piping using the | character. \nProcesses can be created in the background using the & character\n";
 			cout<<"-------------------\n";
 			continue;
 		}
@@ -369,8 +374,8 @@ void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activePr
 	}
 	else{
 		//Hay que usar PIPES
-		cout<<"numPipes no es 0, ejecutamos fork usando pipes\n";
-		cout<<"numPipes en executeProgram: "<<numPipes<<endl;
+		//cout<<"numPipes no es 0, ejecutamos fork usando pipes\n";
+		//cout<<"numPipes en executeProgram: "<<numPipes<<endl;
 
 		//aux es usado para ir guardando a medida que uno hace pipes
 		char *aux[100];
@@ -409,13 +414,13 @@ void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activePr
 				}
 			}
 			aux[wordsInPipe] = NULL;
-			cout<<"En aux: \n";
-			for (int i = 0; i < wordsInPipe; ++i)
+			//cout<<"En aux: \n";
+			/*for (int i = 0; i < wordsInPipe; ++i)
 			{
 				cout<<aux[i]<<endl;
-			}
-			cout<<"OFFSET "<<offset<<endl;
-			cout<<"WORDS "<<words<<endl;
+			}*/
+			//cout<<"OFFSET "<<offset<<endl;
+			//cout<<"WORDS "<<words<<endl;
 			//system("echo FUNCIONA CTM");
 			pipe(fd);
 
