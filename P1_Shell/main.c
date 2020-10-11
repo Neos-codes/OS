@@ -18,12 +18,15 @@ void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activePr
 
 int update_freq (char **cmd, int wordsInCmd, vector <pair<int, char *> > &command_freq);
 
+void createZombies(char *cmd, vector <pid_t> &zombie_list);
+
+void the_purge(vector <pid_t> &zombie_list);
+
 
 int main(){
-
-
   vector <pair<int, char *> > command_freq;
   command_freq.push_back(make_pair(0, strdup("mostrarFrec")));
+  vector <pid_t> zombie_list;
 
   char line[100];
   char *cmd[100];
@@ -110,6 +113,16 @@ int main(){
       continue;
     }
 
+    if (!strcmp(cmd[0], "arise")){
+      createZombies(cmd[1], zombie_list);
+      continue;
+    }
+
+    if (!strcmp(cmd[0], "purge")){
+      the_purge(zombie_list);
+      continue;
+    }
+
     if (!strcmp(cmd[0], "mostrarFrec")){
 
             vector <pair<int, char *> > aux = command_freq;
@@ -152,7 +165,7 @@ int main(){
 
     if (!strcmp(cmd[0], "help")){
       cout<<"Welcome to CFF shell, it includes support for the following built-in commands"<<endl;
-      cout<<"-cd [directory]\n-mostrarFrec\n-help\n-exit\n";
+      cout<<"-cd [directory]\n-mostrarFrec [n(default: 5)]\n-arise [n(default: 10)]\n-help\n-exit\n";
       cout<<"-------------------\n";
       continue;
     }
@@ -165,20 +178,19 @@ int main(){
       runBg = false;
     }
 
-    if (!strcmp(cmd[wordsInCmd-1], "&")){
-      cout<<"Hay que correr en BG\n";
-      runBg = true;
-    }
-    else{
-      runBg = false;
-    }
+    // if (!strcmp(cmd[wordsInCmd-1], "&")){
+    //   cout<<"Hay que correr en BG\n";
+    //   runBg = true;
+    // }
+    // else{
+    //   runBg = false;
+    // }
 
     //Run program
     if(wordsInCmd > 0){
       executeProgram(cmd, wordsInCmd, runBg, activeProcesses);
     }
   }
-
   return 0;
 }
 
@@ -300,6 +312,7 @@ int update_freq (char **cmd, int wordsInCmd, vector <pair<int, char *> > &comman
 void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activeProcesses){
   //cout<<"Ejecuto fork()\n";
   pid_t pid = fork();
+  int status;
   if(pid < 0){
     //printf("Error al crear hijo!\n");
     cout<<"Error al crear hijo!\n";
@@ -327,7 +340,7 @@ void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activePr
   	// Padre
     //printf("Soy padre P: %d mi Hijo : %d\n", getpid(), pid);
     if (!runBg){
-      wait(NULL);
+      waitpid(pid, &status, 0);
     }
     else{
     	//Insertamos proceso en la lista de procesos del programa
@@ -335,4 +348,34 @@ void executeProgram(char *cmd[100], int words, bool runBg, vector<int> &activePr
     	cout<<"["<<pid<<"] in background"<<endl;
     }
   }
+}
+
+void createZombies(char *cmd, vector <pid_t> &zombie_list) {
+    int n;
+    if (cmd == NULL) {
+        n = 10;
+    } else {
+        n = atoi(cmd);
+    }
+
+    cout << "spawning " << n << " zombies\n";
+    pid_t pid;
+    for (int i = 0; i < n; i++) {
+        pid = fork();
+        if (pid < 0) {
+            cout << "error al crear hijo\n";
+        } else if (pid == 0) {
+            exit(0);
+        } else {
+            cout << "Proceso " << getpid() << " a creado zombie " << pid << "\n";
+            zombie_list.push_back(pid);
+        }
+    }
+}
+
+void the_purge(vector <pid_t> &zombie_list) {
+    int status;
+    for (int i = 0; i < zombie_list.size(); i++) {
+        waitpid(zombie_list[i], &status, 0);
+    }
 }
