@@ -24,6 +24,7 @@ void the_purge(vector <pid_t> &zombie_list);
 
 int main(){
 
+
   vector <pair<int, char *> > command_freq;
   command_freq.push_back(make_pair(0, strdup("mostrarFrec")));
   vector <pid_t> zombie_list;
@@ -127,15 +128,43 @@ int main(){
 			continue;
 		}
 
-    if (!strcmp(cmd[0], "arise")){
-      createZombies(cmd[1], zombie_list);
-      continue;
-    }
 
-    if (!strcmp(cmd[0], "purge")){
-      the_purge(zombie_list);
-      continue;
-    }
+        //Check if function is built in
+
+        if (!strcmp(cmd[0], "exit")){
+            if(activeProcesses.size() > 0){
+                cout<<"Aun hay procesos en ejecucion, esta seguro que desea salir? (Y) (N)\n";
+            	for (int i = 0; i < activeProcesses.size(); ++i)
+            	{
+                    cout<<"Proceso "<<activeProcesses[i]<<endl;
+            	}
+            	char c = getchar();
+                getchar();
+                if(c == 121 || c == 89){
+                    //Si escribe Y o y se sale
+
+                    //se sale del programa
+                    running = false;
+                    continue;
+                }
+                else{
+                	continue;
+                }
+            }
+            cout<<"Exiting\n";
+            running = false;
+            continue;
+        }
+
+        if (!strcmp(cmd[0], "cd")){
+            chdir(cmd[1]);
+            continue;
+        }
+
+        if (!strcmp(cmd[0], "arise")){
+            createZombies(cmd[1], zombie_list);
+            continue;
+        }
 
 		if (!strcmp(cmd[0], "mostrarFrec")){
 
@@ -199,6 +228,8 @@ int main(){
 			executeProgram(cmd, wordsInCmd, runBg, activeProcesses, numPipes);
 		}
 	}
+
+
 
 	return 0;
 
