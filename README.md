@@ -5,6 +5,6 @@ Some Operating System Course Stuff
 
 P1_Shell: Project 1, a Shell for Linux/Unix, with pipes, built-in functions and many other functions.
 
-Wrote by Fabián Cid, Rodolfo Fariña y Pablo Furet in C++.
+Wrote by Fabián Cid, Rodolfo Fariña & Pablo Furet in C++.
 
 October, 2020.
